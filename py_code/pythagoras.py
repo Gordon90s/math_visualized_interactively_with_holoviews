@@ -21,7 +21,7 @@ col_sq_3 = bp.all_palettes[color_palette][256][20]
 col_rect = bp.all_palettes[color_palette][256][145]
 
 # options for plot styling
-opts = {'Polygons': dict(toolbar=None, xaxis=None, yaxis=None, width=355, height=380, line_width=1.5)}
+opts = {'Polygons': dict(toolbar=None, xaxis=None, yaxis=None, width=355, height=380, line_width=1.5, show_frame=False)}
 
 # left part of the visual proof, squares of area a^2 and b^2 + 4 triangles of area a*b/2
 def square_left(a=1):
