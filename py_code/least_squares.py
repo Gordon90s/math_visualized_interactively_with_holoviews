@@ -6,7 +6,6 @@ hv.extension('bokeh')
 import bokeh.palettes as bp # for color palettes
 
 
-
 # set up model
 np.random.seed(22)  # set seed for reproducability
 n_points = 10  # number of points for the regression
@@ -28,34 +27,25 @@ def predictions(a_est=1, b_est=-3):
     # first item returns y_est, second item returns error_est, third sum of squared errors
     return np.asarray([y_est,error_est,sum_of_errors_est])
 
-# plot styling options
-color_palette = 'PuRd'
-col_1 = bp.all_palettes[color_palette][9][1]
-col_2 = bp.all_palettes[color_palette][9][2]
-col_3 = bp.all_palettes[color_palette][9][2]
-options_curve = {'Curve': dict(color='red')}
-options_points = {'Points': dict(marker='o', size=8,height=350, width=350)}
-options_polygons = {'Polygons': dict(color=col_3)}
-# options_dmap = {'DynamicMap': dict(height=350, width=350)}  # not working...
-
 # create HoloViews objects
-# simulated data
-hv_points = hv.Points((x,y))#.options(options_points) why does that destroy my graphic...?
-# it destroys not even the graphic it is involved (?!)
-# adding this everywhere does not help either #.redim.range(a_est = (a_est_min, a_est_max), b_est = (b_est_min, b_est_max))
+## simulated data
+hv_points = hv.Points((x,y))
 
-# y=a_est*x+b_est line
+## y=a_est*x+b_est line
 def hv_line_est(a_est, b_est):
-    hv_curve = hv.Curve((x,predictions(a_est, b_est)[0])).options(options_curve) # squared errors visualized as squares
+    hv_curve = hv.Curve((x,predictions(a_est, b_est)[0])) 
     hv_curve = hv_curve.relabel("sum_of_squares: {}".format(np.round(predictions(a_est, b_est)[2],2)))  # add sum of squares to graphic # I would like this output not as legend but on top
     return hv_curve
+
+## squared errors visualized as squares
 def hv_squares(a_est, b_est):
     hv_polygons = hv.Polygons([{('x', 'y'): rectangle(x, y, w, w)}
-             for x, y, w in np.c_[x,y,predictions(a_est, b_est)[1]]]).options(options_polygons)
+             for x, y, w in np.c_[x,y,predictions(a_est, b_est)[1]]])
     return hv_polygons
-# create point of coordinate (a_est,b_est)
+
+## create point of coordinate (a_est,b_est)
 def hv_point_est(a_est, b_est):
-    return hv.Points((a_est,b_est)).options(options_points)
+    return hv.Points((a_est,b_est)).options(marker='o', size=10, color='red')
 
 # define estimate ranges and vectors for a_est and b_est
 n_est = 100  # number of estimates for each a_est and b_est
@@ -73,11 +63,10 @@ for i in range(n_est):
         matrix[i,j] = predictions(a_est_vector[j], b_est_vector[-i-1])[2]  # these are the sum of squares
 bounds = (a_est_min,b_est_min,a_est_max,b_est_max)  # bounds for the coming plot
 a_est_grid, b_est_grid = np.meshgrid(a_est_vector, b_est_vector)  # create input grid
-hv_img = hv.Image(a_est_grid + b_est_grid, ['a estimate','b estimate'], bounds = bounds).options(cmap='PuRd',height=350, width=350)  # initialize plot; hv.Image content is added in next line
+hv_img = hv.Image(a_est_grid + b_est_grid, ['a estimate','b estimate'], bounds = bounds)  # initialize plot; hv.Image content is added in next line
 hv_img.data = matrix  # overwrite data with data we want
 contour_levels=50
-cmap_custom = hv.plotting.util.polylinear_gradient(['#000000', '#000000'], 20)  # color map in only black
-hv_contours = hv_img * hv.operation.contours(hv_img, levels=contour_levels).options(show_legend=False, cmap=cmap_custom)
+hv_contours = hv_img * hv.operation.contours(hv_img, levels=contour_levels)
 
 # set up dimensions for kdims for coming dynamic maps
 dim_a_est = hv.Dimension('a_est', range=(a_est_min, a_est_max), default=1)
@@ -85,16 +74,29 @@ dim_b_est = hv.Dimension('b_est', range=(b_est_min, b_est_max), default=-3.0)
 
 # dynamic maps
 dmap_coords_a_b_est = hv.DynamicMap(hv_point_est, kdims=[dim_a_est,dim_b_est])
-dmap_squares = hv.DynamicMap(hv_squares, kdims=[dim_a_est,dim_b_est]).options(height=350, width=350)  #options(options_dmap) # why does this not work?
+dmap_squares = hv.DynamicMap(hv_squares, kdims=[dim_a_est,dim_b_est])
 dmap_line_est = hv.DynamicMap(hv_line_est, kdims=[dim_a_est,dim_b_est])
-ls_layout = (dmap_squares * dmap_line_est * hv_points).redim.range(x=(0,11.5), y=(-2.5,7.8))
+ls_layout = (dmap_squares * dmap_line_est * hv_points.options(marker='o', size=5)).redim.range(x=(-0.5,12.5), y=(-3,10))
 
+# plot styling options
+color_palette = 'PuRd'
+col_1 = bp.all_palettes[color_palette][9][1]
+col_2 = bp.all_palettes[color_palette][9][2]
+col_3 = bp.all_palettes[color_palette][9][2]
+cmap_custom = hv.plotting.util.polylinear_gradient(['#000000', '#000000'], 2)  # color map in only black
+
+options = {'Curve': dict(color='red', height=350, width=350),
+           'Polygons': dict(color=col_3),
+           'Image': dict(cmap='PuRd', height=350, width=350),
+           'Contours': dict(show_legend=False, cmap=cmap_custom),
+           'Layout': dict(shared_axes=False, normalize=False, title_format='')
+          }                                
+                  
 # generate layouts
-contour_layout = hv_contours * dmap_coords_a_b_est
+contour_layout = hv_contours * dmap_coords_a_b_est     
 least_square_viz = (ls_layout + contour_layout)
-least_square_viz
+least_square_viz = least_square_viz.options(options)
 
 # visualize only points with fitted line
-hv_points_viz = hv_points.options(height=400,width=700).redim.range(x=(0,11), y=(-2.5,7.5))
+hv_points_viz = hv_points.options(height=400,width=650).redim.range(x=(0,11), y=(-3.5,9.5))
 hv_points_viz *= hv_line_est(a,b).options(color='red')
-hv_points_viz

@@ -55,7 +55,7 @@ color_palette = 'Inferno'
 color_1 = bp.all_palettes[color_palette][256][145]
 color_2 = bp.all_palettes[color_palette][256][20]
 # plot styling options
-styling_options = {'Curve': dict(height=400, width=700, tools=['hover'], toolbar='right', color=color_1, line_width=2.5),
+styling_options = {'Curve': dict(height=400, width=640, tools=['hover'], toolbar='right', color=color_1, line_width=2.5),
            'HLine': dict(color='grey', line_width=2)}
 
 # generate customized plot
