@@ -57,7 +57,7 @@ for i in range(n_a):
         y_n = fct(a_var[i], x_n, b)
         x_n_1 = y_n
         path = path + [(x_n, 0), (x_n, x_n), (x_n, y_n), (x_n_1, y_n)]
-        hv_path_list_j.append(hv.Path([path]).options(color=col_2))
+        hv_path_list_j.append(hv.Path([path]))
         x_n = x_n_1
     hv_path_list.append(hv_path_list_j)
 
