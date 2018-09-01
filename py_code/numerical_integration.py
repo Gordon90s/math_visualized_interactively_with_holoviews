@@ -1,8 +1,7 @@
 import holoviews as hv
 import numpy as np
-hv.extension('bokeh')
 import bokeh.palettes as bp  # for color palettes
-
+hv.extension('bokeh')
 
 
 # define function of choice
@@ -21,9 +20,6 @@ def int_fct_ev(x1,x2):
 x = np.linspace(0,10, num = 201)  # range of x over which to plot x
 y = fct(x)
 
-
-
-
 # plot styling
 color_palette = 'Inferno'
 col_1 = bp.all_palettes[color_palette][256][145]
@@ -40,7 +36,6 @@ def hv_rectangle(x=0, y=0, width=.05, height=.05):
 # Create curve and integral
 hv_curve = hv.Curve((x,y),'x','f(x)').options(opts_curve_1)
 hv_int = hv.Area((x,y),'x','f(x)').options(color=col_1) # create integral polygone from input vector x and y
-
 
 
 
@@ -69,25 +64,25 @@ for j in range(len(n_steps)):
 
 # create dictionary containing the curve approx. for each step and create HoloMap object
 polygone_dict = {j:hv_int_box_approx[j] for j in range(len(n_steps))}
-hmap_poly = hv.HoloMap(polygone_dict, kdims=['Steps'])
+hmap_poly = hv.HoloMap(polygone_dict, kdims=['step'])
 
 # calculate differences between actual and estimated integral
 real_int = int_fct_ev(0,10)  # known value of the integral
-int_error = approx_int - real_int  # difference between actual and estimated integral
+int_error = (approx_int - real_int)/real_int  # percentage difference between actual and estimated integral
 
 # create HV objects for error curve
-hv_int_error = hv.Curve((n_steps,int_error), 'steps', 'error').options(opts_curve_2)
+hv_int_error = hv.Curve((n_steps,int_error), 'n', 'error (in %)').options(opts_curve_2)
 hv_int_error_points = []
 
 # create hmap for error or error curve
 for j in range(len(n_steps)):
     hv_int_error_points.append(hv.Points((n_steps[j],int_error[j])).options(opts_point))
 error_points_dict = {j:hv_int_error_points[j] for j in range(len(n_steps))}
-hmap_error_points = hv.HoloMap(error_points_dict, kdims=['Steps'])
+hmap_error_points = hv.HoloMap(error_points_dict, kdims=['step'])
 # create horizontal line at 0
 hv_hline = hv.HLine(0).options(color='black',line_width=0.8, line_dash='dashed')
 
 # create layouts
-layout_approx_int = (hmap_poly * hv_curve).redim.range(x=(0,10), y = (0,1.08))
-layout_error_fct = (hv_int_error * hmap_error_points *hv_hline).redim.range(x=(0,20),y=(-0.28,0.025))
+layout_approx_int = (hmap_poly * hv_curve).redim.range(x=(0,10),y=(0,1.065))
+layout_error_fct = (hv_int_error * hmap_error_points *hv_hline).redim.range(x=(2,30.5),y=(-0.04,0.005))
 int_approx_viz = (layout_approx_int + layout_error_fct).options(title_format='')
