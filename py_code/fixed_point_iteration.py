@@ -33,7 +33,7 @@ hv_curve_xx = hv.Curve((x,x)).options(opts_line_x_x)
 
 
 # create HoloMap object with varying slope
-n_a = 21 # number of slope changes
+n_a = 20 # number of slope changes
 lower_slope_limit = 0.4
 upper_slope_limit = 1.2
 
@@ -43,8 +43,8 @@ y_list = []
 for i in range(n_a):
     y_list.append(hv.Curve((x,fct(a_var[i],x,b))).options(opts_curve))
 # create HoloMap object    
-dict_y = {a_var[i]:y_list[i] for i in range(n_a)}
-dim_a = hv.Dimension(('a','a'))  # would like to add `default=a_var[8]`, but that breaks the code (bug)
+dict_y = {round(a_var[i], 2):y_list[i] for i in range(n_a)} 
+dim_a = hv.Dimension(('a','a'), default=round(a_var[8], 2))
 hmap_y = hv.HoloMap(dict_y, kdims = dim_a).options(title_format='')
 
 
@@ -67,11 +67,10 @@ for i in range(n_a):
         x_n = x_n_1
     hv_path_list.append(hv_path_list_j)   
     
-dict_path = {(a_var[i],j): hv_path_list[i][j] for i in range(n_a) for j in steps}
+dict_path = {(round(a_var[i], 2),j): hv_path_list[i][j] for i in range(n_a) for j in steps}
 hmap_path = hv.HoloMap(dict_path, kdims = [dim_a,'step']).options(title_format='')
 fix_point_viz = hmap_y * hv_curve_xx * hmap_path
 fix_point_viz_1 = fix_point_viz.redim.range(x=(0,9),y=(0,9))
 fix_point_viz_2 = fix_point_viz
-
 
 
