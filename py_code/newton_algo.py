@@ -153,9 +153,9 @@ for i in range(n_steps+1):
 # create HoloViews map
 dict_steps = {int(steps): hv_tangent_list[steps] * hv_x_n_list[steps] * hv_x_n_list[steps+1]
               * hv_xy_points[steps] for steps in range(n_steps)}
-hmap_newton = hv.HoloMap(dict_steps, kdims=['Steps'])
+hmap_newton = hv.HoloMap(dict_steps, kdims=['step'])
 
 # and plot them together with our previous plots
 newton_viz = hmap_newton * layout_f
 newton_viz = newton_viz.redim.range(x = (min_plot_x, max_plot_x), y = (min_plot_y, max_plot_y))
-newton_viz
+newton_viz = newton_viz.options(title_format='')

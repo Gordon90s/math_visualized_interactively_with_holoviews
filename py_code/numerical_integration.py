@@ -1,7 +1,11 @@
-import holoviews as hv
+# Visualization of the least square algorithm with slope a and offset b
+
 import numpy as np
-import bokeh.palettes as bp  # for color palettes
+import holoviews as hv
 hv.extension('bokeh')
+import bokeh.palettes as bp # for color palettes
+
+
 
 
 # define function of choice
@@ -40,8 +44,16 @@ hv_int = hv.Area((x,y),'x','f(x)').options(color=col_1) # create integral polygo
 
 
 
+hv_rectangle_0 = hv_rectangle(x=0, y=0, width=10, height=(fct((0+10)/2)))
+int_approx_viz_0 = (hv_rectangle_0 * hv_curve).redim.range(y=(0,1.08))
+
+
+
+
+
+
 # number of steps to approximate the integral with
-n_steps = np.arange(3,30)
+n_steps = np.arange(3,31)
 
 # create empty list to store all integral approximations for all n_steps
 hv_int_box_approx = []
@@ -54,17 +66,17 @@ for j in range(len(n_steps)):
     approx_int_j = 0.0  # value of approximated integral
     # how to approximate a function using rectangles
     for i in range(n_steps[j]):
-        hv_int_box_approx_j.append(hv_rectangle(x=x_steps[i], y=0, width=x_steps[1]-x_steps[0], height=(fct(x_steps[i])+fct(x_steps[i+1]))/2))
-        approx_int_j = approx_int_j+(x_steps[1]-x_steps[0])*(fct(x_steps[i])+fct(x_steps[i+1]))/2  # calculate approx integral
-    # add all rectangles together and create an ndoverlay
-    polygone_dict = {i:hv_int_box_approx_j[i] for i in range(n_steps[j])}
-    ndoverlay = hv.NdOverlay(polygone_dict)
+        hv_int_box_approx_j.append(hv_rectangle(x=x_steps[i], y=0, width=x_steps[1]-x_steps[0], height=(fct((x_steps[i]+x_steps[i+1])/2))))
+        approx_int_j = approx_int_j+(x_steps[1]-x_steps[0])*fct((x_steps[i]+x_steps[i+1])/2)  # calculate approx integral
+    # add all rectangles together and create an ndoverlay    
+    polygone_dict = {i+3:hv_int_box_approx_j[i] for i in range(n_steps[j])}
+    ndoverlay = hv.NdOverlay(polygone_dict) 
     hv_int_box_approx.append(ndoverlay)
     approx_int.append(approx_int_j)
 
-# create dictionary containing the curve approx. for each step and create HoloMap object
-polygone_dict = {j:hv_int_box_approx[j] for j in range(len(n_steps))}
-hmap_poly = hv.HoloMap(polygone_dict, kdims=['step'])
+# create dictionary containing the curve approx. for each step and create HoloMap object    
+polygone_dict = {j+3:hv_int_box_approx[j] for j in range(len(n_steps))}
+hmap_poly = hv.HoloMap(polygone_dict, kdims=['n'])
 
 # calculate differences between actual and estimated integral
 real_int = int_fct_ev(0,10)  # known value of the integral
@@ -77,12 +89,14 @@ hv_int_error_points = []
 # create hmap for error or error curve
 for j in range(len(n_steps)):
     hv_int_error_points.append(hv.Points((n_steps[j],int_error[j])).options(opts_point))
-error_points_dict = {j:hv_int_error_points[j] for j in range(len(n_steps))}
-hmap_error_points = hv.HoloMap(error_points_dict, kdims=['step'])
+error_points_dict = {j+3:hv_int_error_points[j] for j in range(len(n_steps))}    
+hmap_error_points = hv.HoloMap(error_points_dict, kdims=['n'])
 # create horizontal line at 0
 hv_hline = hv.HLine(0).options(color='black',line_width=0.8, line_dash='dashed')
 
 # create layouts
 layout_approx_int = (hmap_poly * hv_curve).redim.range(x=(0,10),y=(0,1.065))
-layout_error_fct = (hv_int_error * hmap_error_points *hv_hline).redim.range(x=(2,30.5),y=(-0.04,0.005))
+layout_error_fct = (hv_int_error * hmap_error_points *hv_hline).redim.range(x=(2,30.5),y=(-0.0002,0.02))
 int_approx_viz = (layout_approx_int + layout_error_fct).options(title_format='')
+
+
